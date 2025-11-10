@@ -133,6 +133,29 @@ const ephysDatasetsQuery = buildKGQuery("core/DatasetVersion", [
   ],
 ]);
 
+const patchClampDatasetListQuery = buildKGQuery("core/DatasetVersion", [
+  ...minimalDatasetProperties,
+  ...[
+    L("accessibility/name", [], { filter: "free access", required: true }),
+    // L("experimentalApproach/name", [], { filter: "electrophysiology", required: true }),
+    L("technique/name", [], { filter: "clamp", required: true }),
+    L("studiedSpecimen", [S("lookupLabel")], { type: "core/Subject", expectSingle: false }),
+    R("activities", "isPartOf", [S("@id"), S("@type")], MULTIPLE),
+  ],
+]);
+
+const extracellularDatasetListQuery = buildKGQuery("core/DatasetVersion", [
+  ...minimalDatasetProperties,
+  ...[
+    L("accessibility/name", [], { filter: "free access", required: true }),
+    // L("experimentalApproach/name", [], { filter: "electrophysiology", required: true }),
+    L("technique/name", [], { filter: "extracellular", required: true }),
+    L("studiedSpecimen", [S("lookupLabel")], { type: "core/Subject", expectSingle: false }),
+    R("activities", "isPartOf", [S("@id"), S("@type")], MULTIPLE),
+  ],
+]);
+
+
 const techniquesQuery = buildKGQuery("core/DatasetVersion", [L("technique/name", [], MULTIPLE)]);
 
 const basicDatasetQuery = buildKGQuery("core/DatasetVersion", [
@@ -325,4 +348,161 @@ const patchClampDatasetQuery = buildKGQuery("core/DatasetVersion", [
   ],
 ]);
 
-export { ephysDatasetsQuery, techniquesQuery, basicDatasetQuery, patchClampDatasetQuery };
+// Query used to verify extracellularRecordingDataset implementation. Not sufficient. 
+const extracellularRecordingDatasetQuery = buildKGQuery("core/DatasetVersion", [
+  ...basicDatasetProperties,
+  ...[
+    L("studiedSpecimen",     
+      [
+        S("lookupLabel"),
+        L("species", [...controlledTermProperties, ...[L("species/name")]]),
+        L("biologicalSex/name"),
+        L("studiedState",[
+            S("lookupLabel"),
+            L("age", quantValProperties),
+            L("ageCategory/name"),
+            L("pathology", [S("name")], MULTIPLE),
+            R("protocolExecutionInput","input",[S("lookupLabel"),S("@type"),S("description"),L("protocolPE",[S("description"),L("technique", [S("name")], MULTIPLE)], MULTIPLE)], {type: "core/ProtocolExecution"}),
+            R("protocolExecutionOutput","output",[S("lookupLabel"), S("@type"), S("description"), L("protocolPE",[S("description"),L("technique", [S("name")], MULTIPLE)], MULTIPLE)], {type: "core/ProtocolExecution"}),
+            R("cranialWindowPreparationInput", "input", [S("lookupLabel"), S("description"), L("protocolCWP", [S("description"), L("technique", [S("name")], MULTIPLE)], MULTIPLE)], {type: "specimenpre/CranialWindowPreparation"}),
+          ])])]])
+        
+
+// Former query: 
+            
+//             MULTIPLE),
+//                 L(
+//                   "output",
+//                   [
+//                   // subjectState_PE_output
+//                   S("lookupLabel"),
+//                   R("subjectState", "studiedState", [ // TODO remove ?
+//                     S("lookupLabel")
+//                   ]),
+//                   R(
+//                     "CranialWindowPreparation",
+//                     "input",
+//                     [
+//                       // cranial window preparation
+//                       S("lookupLabel"),
+//                       S("@type"),
+//                       S("description"),
+//                       L(
+//                         "protocol", 
+//                         [
+//                           // protocol_CWP
+//                           S("description"),
+//                           L("technique", [S("name")], MULTIPLE),  
+//                         ], 
+//                         MULTIPLE // TODO not sure about MULTIPLE here
+//                       ),
+//                       L("constructionType", controlledTermProperties),
+//                       L(
+//                         "output",
+//                         [
+//                           // subjectState_CWP_output
+//                           S("lookupLabel"),
+//                           R("subjectState", "studiedState", [
+//                             S("lookupLabel")
+//                           ]),
+//                           R(
+//                             "electrodePlacement",
+//                             "input",
+//                             [
+//                               // electrode placement
+//                               S("lookupLabel"),
+//                               S("description"),
+//                               L(
+//                                 "device",
+//                                 [
+//                                   L("electrodeUsage")
+//                                 ],
+//                                 MULTIPLE
+//                               ),
+//                               L(
+//                                 "output",
+//                                 [
+//                                   // subjectState_EP_output
+//                                   S("lookupLabel"),
+//                                   R("subjectState", "studiedState", [
+//                                     S("lookupLabel")
+//                                   ]), 
+//                                   R(
+//                                     "recordingActivity",
+//                                     "input",
+//                                     [
+//                                       // recording activity
+//                                       S("lookupLabel"),
+//                                       S("@type"),
+//                                       S("description"),
+//                                       S("internalIdentifier"),
+//                                       L("output", fileProperties, MULTIPLE),
+//                                     ],
+//                                     { type: "ephys/RecordingActivity", expectSingle: false }
+//                                   ),
+//                                   R(
+//                                     "stimulationActivity",
+//                                     "input",
+//                                     [
+//                                       // stimulation activity
+//                                       S("lookupLabel"),
+//                                       S("@type"),
+//                                       L(
+//                                         "stimulus",
+//                                         [
+//                                           S("lookupLabel"),
+//                                           S("@type"),
+//                                           S("description"),
+//                                           L("epoch", quantValProperties),
+//                                           S("internalIdentifier"),
+//                                           L("specification", [S("lookupLabel"), S("configuration")]),
+//                                         ],
+//                                         MULTIPLE
+//                                       ),
+//                                       L(
+//                                         "output",
+//                                         [
+//                                           // file
+//                                           ...fileProperties,
+//                                           ...[
+//                                             R("metadata", "dataLocation", [
+//                                               S("name"),
+//                                               S("additionalRemarks"),
+//                                               L("samplingFrequency", quantValProperties),
+//                                               L(
+//                                                 "channel",
+//                                                 [S("internalIdentifier"), L("unit/name")],
+//                                                 MULTIPLE
+//                                               ),
+//                                             ]),
+//                                           ],
+//                                         ],
+//                                         MULTIPLE
+//                                       ),
+//                                     ],
+//                                     {
+//                                       type: "stimulation/StimulationActivity",
+//                                       expectSingle: false,
+//                                     }
+//                                   ),
+//                                 ],
+//                               ),
+//                             ],
+//                           ),
+//                         ],MULTIPLE
+//                       ),
+//                     ],
+//                   ),
+//                 ]),
+//               ],
+//             ),
+//           ],
+//         ),
+//       ],
+//     { type: "core/Subject", expectSingle: false }
+//     ),
+//   ]
+// ]);
+
+
+export { ephysDatasetsQuery, techniquesQuery, basicDatasetQuery, patchClampDatasetQuery, extracellularRecordingDatasetQuery, patchClampDatasetListQuery, extracellularDatasetListQuery };
