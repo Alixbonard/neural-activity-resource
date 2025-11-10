@@ -31,6 +31,8 @@ let cache = {
   "datasets techniques": {},
   "patch clamp recordings summary": {},
   "patch clamp recordings detail": {},
+  "extracellular recordings summary": {},
+  "extracellular recordings detail": {},
 };
 //cache["datasets detail"][uuidFromUri(examplePatchClampData["@id"])] = examplePatchClampData;
 //cache["datasets detail"]["example"] = examplePatchClampData;
