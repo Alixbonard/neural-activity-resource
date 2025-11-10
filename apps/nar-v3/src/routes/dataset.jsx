@@ -27,7 +27,7 @@ import Navigation from "../components/Navigation";
 import DatasetCard from "../components/DatasetCard";
 import ProgressIndicator from "../components/ProgressIndicator";
 
-import { basicDatasetQuery, patchClampDatasetQuery, techniquesQuery } from "./queryLibrary";
+import { basicDatasetQuery, patchClampDatasetQuery, techniquesQuery, extracellularRecordingDatasetQuery} from "./queryLibrary";
 
 export function getLoader(auth) {
   const loader = async ({ params }) => {
@@ -44,12 +44,16 @@ export function getLoader(auth) {
     );
     console.log(techniques.technique);
     let query = basicDatasetQuery;
-    if (techniques.technique && techniques.technique.includes("whole cell patch clamp")) {
+    if (techniques.technique && techniques.technique.includes("extracellular electrophysiology")) {
+      console.log("Using extracellular recording dataset query");
+      query = extracellularRecordingDatasetQuery;
+    } else if (techniques.technique && techniques.technique.includes("whole cell patch clamp")) {
       console.log("Using patch clamp dataset query");
       query = patchClampDatasetQuery;
     } else {
       console.log("Using basic dataset query");
     }
+    console.log(techniques.technique);
     const datasetPromise = getKGItem("datasets detail", query, params.datasetId, auth, stage);
     console.log(datasetPromise);
     return defer({ dataset: datasetPromise });
