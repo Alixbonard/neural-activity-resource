@@ -34,6 +34,8 @@ import Datasets, { getLoader as datasetsLoader } from "./routes/datasets";
 import Dataset, { getLoader as datasetLoader } from "./routes/dataset";
 import PatchClampIndex, { getLoader as patchClampIndexLoader } from "./routes/patchClampRecordings";
 import PatchClamp, { getLoader as patchClampLoader } from "./routes/patchClampRecording";
+import ExtracellularIndex, { getLoader as extracellularRecordingIndexLoader } from "./routes/extracellularRecordings";
+import ExtracellularR, { getLoader as extracellularRecordingLoader } from "./routes/extracellularRecording";
 
 const theme = createTheme({
   typography: {
@@ -81,10 +83,20 @@ function getRouter(auth) {
       loader: patchClampIndexLoader(auth),
     },
     {
-      path: "patch-clamp/:expId",
-      element: <PatchClamp />,
-      loader: patchClampLoader(auth),
+      path: "patch-clamp/:datasetId",
+      element: <Dataset />,
+      loader: datasetLoader(auth),
     },
+    {
+      path: "extracellular/",
+      element: <ExtracellularIndex />,
+      loader: extracellularRecordingIndexLoader(auth),
+    },
+    {
+      path: "extracellular/:datasetId",
+      element: <ExtracellularR />,
+      loader: extracellularRecordingLoader(auth),
+    }
   ]);
 }
 
@@ -126,12 +138,14 @@ function renderApp(auth) {
   );
 }
 
-window.addEventListener("DOMContentLoaded", () => initAuth(renderApp));
+// window.addEventListener("DOMContentLoaded", () => initAuth(renderApp));
 
 
 // -- for development, comment out the previous line and uncomment the following ones
 
-// const auth = {
-//   token: "<paste token here>"
-// };
-// window.addEventListener('DOMContentLoaded', () => renderApp(auth));
+const auth = {
+  token: "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJLYU01NTRCM2RmMHBIamZYWi1aRl94bUUwMThPS1R0RkNjMjR3aVVqQmFvIn0.eyJleHAiOjE3NjI1OTUzODksImlhdCI6MTc2MjU1MjE4OSwiYXV0aF90aW1lIjoxNzYyMzU1NjkyLCJqdGkiOiI2ZDZhYmVmMS1jOWRkLTRkZTgtODY4My05NmJiYmNhNzYxZDkiLCJpc3MiOiJodHRwczovL2lhbS5lYnJhaW5zLmV1L2F1dGgvcmVhbG1zL2hicCIsImF1ZCI6WyJ0ZWFtIiwiZ3JvdXAiXSwic3ViIjoiNjVmZWVjMDEtYWU0Yi00YzhiLWJiMWMtYzM2ZTIzODA5NjkwIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoibW9kZWwtdmFsaWRhdGlvbi1zZXJ2aWNlIiwic2lkIjoiZWNlZjRhNTEtY2NkYS00ZTc2LTgxNjEtNWUzYjE4NThmNjg1Iiwic2NvcGUiOiJwcm9maWxlIGNvbGxhYi5kcml2ZSByb2xlcyBvcGVuaWQgZ3JvdXAgdGVhbSIsIm5hbWUiOiJBbGl4IEJvbmFyZCIsIm1pdHJlaWQtc3ViIjoiMjA2MDI1OTc0MDU1MzgxMyIsInByZWZlcnJlZF91c2VybmFtZSI6ImFib25hcmQiLCJnaXZlbl9uYW1lIjoiQWxpeCIsImZhbWlseV9uYW1lIjoiQm9uYXJkIn0.iTNyeJWgLHdvoJOoS4vx-R--nK2v36rOgPpTt0D5d0jF0v6YSmrMBPXF-mSDwK1KO8OeIb4j60i8RnI2mTY7ApsUBL7R_zHLv_Kv-eOQ8MOnIaNer18AMbxQGCX5KyFIlCyPiMzre_jgyy35dxnTnCV0wdB6u0M9aBvV-Y9vQ_XHkIUfzFCxoXCd-8uC_Q-HI4AiGy1JYBckTujGKnNWirqZlaeQAdlST6mrkqGKMedFkdRA1i1XaKAxMoVJp6Rk6l43VQyChyZVIzrXsv3FLb2aBipJGToBGTQ3_M_Ik3kOm5jhp5JmzAqI3T6JNU4p9Yjdq5aoOUZlnP_9DF5n5w",
+    //isCurator : true
+
+};
+window.addEventListener('DOMContentLoaded', () => renderApp(auth));
