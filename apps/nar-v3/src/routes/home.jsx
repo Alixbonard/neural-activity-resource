@@ -32,7 +32,9 @@ import Container from "@mui/material/Container";
 import Chip from "@mui/material/Chip";
 
 import { count } from "../datastore";
+import { query as extracellularRecordingsQuery } from "./extracellularRecordings";
 import { query as patchClampRecordingsQuery } from "./patchClampRecordings";
+
 import { ephysDatasetsQuery } from "./queryLibrary";
 import ProgressIndicator from "../components/ProgressIndicator";
 
@@ -45,6 +47,7 @@ export function getLoader(auth) {
     const statisticsPromise = Promise.all([
       count(patchClampRecordingsQuery, auth, {}, stage),
       count(ephysDatasetsQuery, auth, {}, stage),
+      count(extracellularRecordingsQuery, auth, {}, stage),
     ]);
     console.log(statisticsPromise);
     return defer({ counts: statisticsPromise });
@@ -89,7 +92,7 @@ export default function Home() {
   return (
     <React.Suspense fallback={<ProgressIndicator />}>
       <Await resolve={data.counts} errorElement={<p>Error loading statistics.</p>}>
-        {([patchClampCounts, datasetCounts]) => {
+        {([patchClampCounts, datasetCounts, extracellularCounts]) => { // extracellularCounts
           return (
             <Container maxWidth="lg" sx={{ paddingTop: 8, paddingBottom: 8 }}>
               <Grid container spacing={4}>
@@ -107,36 +110,40 @@ export default function Home() {
                   count={patchClampCounts}
                 />
                 <ModalityCard
-                  label="Intracellular sharp-electrode recording"
-                  path="/sharp-electrode"
-                  image="/images/320px-Microscope_for_Electrophysiological_Research_and_Recording_Equipment.jpg"
-                  count={0}
-                />
-                <ModalityCard
-                  label="ECoG"
-                  path="/ecog"
-                  image="/images/electrocorticography.png"
-                  count={0}
-                />
-                <ModalityCard
-                  label="EEG"
-                  path="/eeg"
-                  image="/images/Human_EEG_with_prominent_alpha-rhythm.png"
-                  count={0}
-                />
-                <ModalityCard
-                  label="Multi-electrode array recording"
-                  path="/mea"
+                  label="Extracellular recording"
+                  path="/extracellular"
                   image="/images/640px-Utah_array_pat5215088.jpg"
-                  count={0}
+                  count={extracellularCounts}
                 />
                 <ModalityCard
                   label="Two-photon calcium imaging"
                   path="/2-photon"
                   image="/images/calcium_imaging.png"
-                  count={0}
+                  count={"coming soon"}
                 />
-                <ModalityCard label="fMRI" path="/fmri" image="/images/1206_FMRI.jpg" count={0} />
+                <ModalityCard
+                  label="Intracellular sharp-electrode recording"
+                  path="/sharp-electrode"
+                  image="/images/320px-Microscope_for_Electrophysiological_Research_and_Recording_Equipment.jpg"
+                  count={"coming soon"}
+                />
+                <ModalityCard
+                  label="ECoG"
+                  path="/ecog"
+                  image="/images/electrocorticography.png"
+                  count={"coming soon"}
+                />
+                <ModalityCard
+                  label="EEG"
+                  path="/eeg"
+                  image="/images/Human_EEG_with_prominent_alpha-rhythm.png"
+                  count={"coming soon"}
+                />
+                <ModalityCard 
+                  label="fMRI" 
+                  path="/fmri" 
+                  image="/images/1206_FMRI.jpg" 
+                  count={"coming soon"} />
               </Grid>
             </Container>
           );
