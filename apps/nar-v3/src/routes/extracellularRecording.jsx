@@ -27,7 +27,7 @@ import Navigation from "../components/Navigation";
 import DatasetCard from "../components/DatasetCard";
 import ProgressIndicator from "../components/ProgressIndicator";
 
-import { basicDatasetQuery, patchClampDatasetQuery, techniquesQuery, extracellularRecordingDatasetQuery} from "./queryLibrary";
+import { basicDatasetQuery, techniquesQuery,protocolExecutionQuery, extracellularRecordingDatasetQuery} from "./queryLibrary";
 
 export function getLoader(auth) {
   const loader = async ({ params }) => {
@@ -42,24 +42,45 @@ export function getLoader(auth) {
       auth,
       stage
     );
-    
     console.log("techniques" + techniques.technique);
 
-    let query = basicDatasetQuery;
-    if (techniques.technique && techniques.technique.includes("whole cell patch clamp")) {
-      console.log("Using patch clamp dataset query");
-      query = patchClampDatasetQuery;
+    // former 
+    // let query = basicDatasetQuery;
+    if (techniques.technique && (techniques.technique.includes("multi-electrode extracellular electrophysiology")) || 
+                                  techniques.technique.includes("extracellular"))
+      {
+      console.log("Using extracellular recording dataset query");
+      query = extracellularRecordingDatasetQuery;
     } else {
       console.log("Using basic dataset query");
     }
+
+    // get Protocol execution instances
+    let query = basicDatasetQuery;
+    if (techniques.technique && (techniques.technique.includes("multi-electrode extracellular electrophysiology")) || 
+                                  techniques.technique.includes("extracellular"))
+          {
+    console.log("Using extracellular recording dataset query: retrieving ProtocolExecution");
+      query = protocolExecutionQuery;
+    } else {
+      console.log("Using basic dataset query");
+    }
+    const protocolExecutionPromise = await getKGItem("protocol execution detail", query, params.datasetId, auth, stage)
+    // get CranialWindowPreparation instances
+
+    // get ExtracellularRecordingDatasetQuery (electrodePlacement + Recording activity + stimulation activity)
+
+
     const datasetPromise = getKGItem("datasets detail", query, params.datasetId, auth, stage);
     console.log(datasetPromise);
     return defer({ dataset: datasetPromise });
   };
+
+  
   return loader;
 }
 
-function Dataset() {
+function ExtracellularDataset() {
   const data = useLoaderData();
 
   return (
@@ -82,4 +103,4 @@ function Dataset() {
   );
 }
 
-export default Dataset;
+export default ExtracellularDataset;

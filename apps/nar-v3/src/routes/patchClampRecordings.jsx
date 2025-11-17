@@ -18,33 +18,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+
 import React from "react";
 import { Await, defer, useLoaderData } from "react-router-dom";
 
-import {
-  buildKGQuery,
-  simpleProperty as S,
-  linkProperty as L,
-  reverseLinkProperty as R,
-} from "../queries";
 import { getKGData } from "../datastore";
 import Navigation from "../components/Navigation";
-import PatchClampRecordingList from "../components/PatchClampRecordingList";
+import DatasetList from "../components/DatasetList";
 import ProgressIndicator from "../components/ProgressIndicator";
+import {patchClampDatasetListQuery} from "./queryLibrary";
 
-export const query = buildKGQuery("core/TissueSample", [
-  S("@id"),
-  S("lookupLabel", { sort: true }),
-  R(
-    "belongsToDataset",
-    "studiedSpecimen",
-    [
-      L("accessibility/name", [], { filter: "free access", required: true }),
-      L("technique/name", [], { filter: "patch clamp", expectSingle: false, required: true }),
-    ],
-    { required: true }
-  ),
-]);
+export const query = patchClampDatasetListQuery
 
 export function getLoader(auth) {
   const loader = async () => {
@@ -52,10 +36,9 @@ export function getLoader(auth) {
     if (auth.isCurator) {
       stage = "IN_PROGRESS";
     }
-    const tissueSamplesPromise = getKGData("patch clamp recordings summary", query, auth, stage);
-
-    console.log(tissueSamplesPromise);
-    return defer({ tissueSamples: tissueSamplesPromise });
+    const patchclampdatasetpromise = getKGData("patch clamp recordings summary", query, auth, {}, stage);
+    console.log(patchclampdatasetpromise);
+    return defer({ datasets: patchclampdatasetpromise });
   };
   return loader;
 }
@@ -64,12 +47,12 @@ function PatchClampIndex() {
   const data = useLoaderData();
 
   return (
-    <div id="tissueSamples">
+    <div id="datasets">
       <Navigation location={["Patch Clamp Recordings"]} />
 
       <React.Suspense fallback={<ProgressIndicator />}>
-        <Await resolve={data.tissueSamples} errorElement={<p>Error loading tissueSamples.</p>}>
-          {(tissueSamples) => <PatchClampRecordingList tissueSamples={tissueSamples} />}
+        <Await resolve={data.datasets} errorElement={<p>Error loading datasets.</p>}>
+          {(datasets) => <DatasetList datasets={datasets} />}
         </Await>
       </React.Suspense>
     </div>

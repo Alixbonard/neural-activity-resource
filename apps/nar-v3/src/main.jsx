@@ -34,6 +34,8 @@ import Datasets, { getLoader as datasetsLoader } from "./routes/datasets";
 import Dataset, { getLoader as datasetLoader } from "./routes/dataset";
 import PatchClampIndex, { getLoader as patchClampIndexLoader } from "./routes/patchClampRecordings";
 import PatchClamp, { getLoader as patchClampLoader } from "./routes/patchClampRecording";
+import ExtracellularIndex, { getLoader as extracellularRecordingIndexLoader } from "./routes/extracellularRecordings";
+import ExtracellularDataset, { getLoader as extracellularDatasetLoader } from "./routes/extracellularRecording";
 
 const theme = createTheme({
   typography: {
@@ -81,10 +83,20 @@ function getRouter(auth) {
       loader: patchClampIndexLoader(auth),
     },
     {
-      path: "patch-clamp/:expId",
-      element: <PatchClamp />,
-      loader: patchClampLoader(auth),
+      path: "patch-clamp/:datasetId",
+      element: <Dataset />, // TODO: replace by PatchClamp later 
+      loader: datasetLoader(auth), // TODO: replace by PatchClampDatasetLoader later
     },
+    {
+      path: "extracellular/",
+      element: <ExtracellularIndex />,
+      loader: extracellularRecordingIndexLoader(auth),
+    },
+    {
+      path: "extracellular/:datasetId",
+      element: <ExtracellularDataset />,
+      loader: extracellularDatasetLoader(auth),
+    }
   ]);
 }
 
@@ -126,12 +138,14 @@ function renderApp(auth) {
   );
 }
 
-window.addEventListener("DOMContentLoaded", () => initAuth(renderApp));
+// window.addEventListener("DOMContentLoaded", () => initAuth(renderApp));
 
 
 // -- for development, comment out the previous line and uncomment the following ones
 
-// const auth = {
-//   token: "<paste token here>"
-// };
-// window.addEventListener('DOMContentLoaded', () => renderApp(auth));
+const auth = {
+  token: "<paste your token here >",
+      //isCurator : true
+
+};
+window.addEventListener('DOMContentLoaded', () => renderApp(auth));

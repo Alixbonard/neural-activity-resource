@@ -133,6 +133,29 @@ const ephysDatasetsQuery = buildKGQuery("core/DatasetVersion", [
   ],
 ]);
 
+const patchClampDatasetListQuery = buildKGQuery("core/DatasetVersion", [
+  ...minimalDatasetProperties,
+  ...[
+    L("accessibility/name", [], { filter: "free access", required: true }),
+    // L("experimentalApproach/name", [], { filter: "electrophysiology", required: true }),
+    L("technique/name", [], { filter: "clamp", required: true }),
+    L("studiedSpecimen", [S("lookupLabel")], { type: "core/Subject", expectSingle: false }),
+    R("activities", "isPartOf", [S("@id"), S("@type")], MULTIPLE),
+  ],
+]);
+
+const extracellularDatasetListQuery = buildKGQuery("core/DatasetVersion", [
+  ...minimalDatasetProperties,
+  ...[
+    L("accessibility/name", [], { filter: "free access", required: true }),
+    // L("experimentalApproach/name", [], { filter: "electrophysiology", required: true }),
+    L("technique/name", [], { filter: "extracellular", required: true }),
+    L("studiedSpecimen", [S("lookupLabel")], { type: "core/Subject", expectSingle: false }),
+    R("activities", "isPartOf", [S("@id"), S("@type")], MULTIPLE),
+  ],
+]);
+
+
 const techniquesQuery = buildKGQuery("core/DatasetVersion", [L("technique/name", [], MULTIPLE)]);
 
 const basicDatasetQuery = buildKGQuery("core/DatasetVersion", [
@@ -325,4 +348,228 @@ const patchClampDatasetQuery = buildKGQuery("core/DatasetVersion", [
   ],
 ]);
 
-export { ephysDatasetsQuery, techniquesQuery, basicDatasetQuery, patchClampDatasetQuery };
+const protocolExecutionQuery = buildKGQuery("core/DatasetVersion", [
+  ...basicDatasetProperties, 
+  ...[ L(
+          "studiedSpecimen",
+          [
+            S("lookupLabel"),
+            L("species", [...controlledTermProperties, ...[L("species/name")]]),
+            L("biologicalSex/name"),
+            L(
+              "studiedState",
+              [
+                S("lookupLabel"),
+                L("age", quantValProperties),
+                L("ageCategory/name"),
+                L("pathology", [S("name")], MULTIPLE),
+                L("attribute", [S("name")],MULTIPLE),
+                // protocolExecution
+                R(
+                  "protocolExecution",
+                  "input",
+                  [
+                    S("description"),
+                    S("lookupLabel"),
+                    L("behavioralProtocol", [S("description")]),
+                    L(
+                      "protocol",
+                      [
+                        S("description"),
+                        L("technique", 
+                          [
+                          S("name")
+                          ]
+                        ),{ type: "core/Protocol", expectSingle: false }
+                      ]
+                    ),
+                    L(
+                      // subject_state_protocol_execution_outputs
+                      "output",
+                      [
+                        S("lookupLabel"),
+                        S("@type"),
+                        S("internalIdentifier"),
+                        L("anatomicalLocation", controlledTermProperties, MULTIPLE),
+                        L("attribute", [S("name")],MULTIPLE),
+                        L("type/name"),
+                        
+                      ], { type: "core/SubjectState", expectSingle: false }
+                    )
+                  ],{ type: "core/ProtocolExecution", expectSingle: false } 
+                )
+              ]
+            )
+          ]
+        )
+      ]
+    ]
+  )
+
+const cranialWindowPreparationQuery = buildKGQuery("core/DatasetVersion", [
+  ...basicDatasetProperties,
+  ...[ L(
+          "studiedSpecimen",
+          [
+            S("lookupLabel"),
+            L("species", [...controlledTermProperties, ...[L("species/name")]]),
+            L("biologicalSex/name"),
+            L(
+              "studiedState",
+              [
+                S("lookupLabel"),
+                L("age", quantValProperties),
+                L("ageCategory/name"),
+                L("pathology", [S("name")], MULTIPLE),
+                L("attribute", [S("name")],MULTIPLE),
+                R(
+                  "cranialWindowPreparation",
+                  "input",
+                  [
+                    S("description"),
+                    S("lookupLabel"),
+                    L("contructionType",controlledTermProperties),
+                    L(
+                      "output",
+                      [
+                        S("lookupLabel"),
+                        S("@type"),
+                        S("internalIdentifier"),
+                        L("anatomicalLocation", controlledTermProperties, MULTIPLE),
+                        L("attribute", [S("name")],MULTIPLE),
+                        L("type/name"),
+                        
+                      ], { type: "core/SubjectState", expectSingle: false }
+                    )
+                  ],{ type: "specimenprep/CranialWindowPreparation", expectSingle: false }
+                )
+              ]
+            )
+          ]
+        )
+      ]
+    ]
+  )
+
+const extracellularRecordingDatasetQuery = buildKGQuery("core/DatasetVersion", [
+...basicDatasetProperties,
+...[ L(
+        "studiedSpecimen",
+        [
+          S("lookupLabel"),
+          L("species", [...controlledTermProperties, ...[L("species/name")]]),
+          L("biologicalSex/name"),
+          L(
+            "studiedState",
+            [
+              S("lookupLabel"),
+              L("age", quantValProperties),
+              L("ageCategory/name"),
+              L("pathology", [S("name")], MULTIPLE),
+              L("attribute", [S("name")],MULTIPLE),
+                R(
+                  "electrodePlacement",
+                  "input",
+                  [
+                    // electrode placement
+                    S("lookupLabel"),
+                    S("description"),
+                    L(
+                      "device",
+                      [
+                        L("electrodeUsage")
+                      ],
+                      MULTIPLE
+                    ),
+                    L(
+                      "output",
+                      [
+                        // subjectState_EP_output
+                        S("lookupLabel"),
+                        R("subjectState", "studiedState", [
+                          S("lookupLabel")
+                        ]), 
+                        R(
+                          "recordingActivity",
+                          "input",
+                          [
+                            // recording activity
+                            S("lookupLabel"),
+                            S("@type"),
+                            S("description"),
+                            S("internalIdentifier"),
+                            L("output", fileProperties, MULTIPLE),
+                          ],
+                          { type: "ephys/RecordingActivity", expectSingle: false }
+                        ),
+                        R(
+                          "stimulationActivity",
+                          "input",
+                          [
+                            // stimulation activity
+                            S("lookupLabel"),
+                            S("@type"),
+                            L(
+                              "stimulus",
+                              [
+                                S("lookupLabel"),
+                                S("@type"),
+                                S("description"),
+                                L("epoch", quantValProperties),
+                                S("internalIdentifier"),
+                                L("specification", [S("lookupLabel"), S("configuration")]),
+                              ],
+                              MULTIPLE
+                            ),
+                            L(
+                              "output",
+                              [
+                                // file
+                                ...fileProperties,
+                                ...[
+                                  R("metadata", "dataLocation", [
+                                    S("name"),
+                                    S("additionalRemarks"),
+                                    L("samplingFrequency", quantValProperties),
+                                    L(
+                                      "channel",
+                                      [S("internalIdentifier"), L("unit/name")],
+                                      MULTIPLE
+                                    ),
+                                  ]),
+                                ],
+                              ],
+                              MULTIPLE
+                            ),
+                          ],
+                          {
+                            type: "stimulation/StimulationActivity",
+                            expectSingle: false,
+                          }
+                        ),
+                      ],
+                    ),
+                  ],{ type: "ephys/ElectrodePlacement", expectSingle: false }
+                ),
+              ],
+              MULTIPLE
+            ),
+          ],
+          MULTIPLE
+        ),
+      ],
+    ],
+  )
+
+
+
+export { ephysDatasetsQuery, 
+  techniquesQuery, 
+  basicDatasetQuery, 
+  patchClampDatasetQuery, 
+  patchClampDatasetListQuery, 
+  extracellularDatasetListQuery,
+  protocolExecutionQuery, 
+  extracellularRecordingDatasetQuery,
+  cranialWindowPreparationQuery
+};
